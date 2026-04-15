@@ -88,6 +88,16 @@ canvas {
   background: #fcfdff;
 }
 
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.filter-grid .canvas-wrap {
+  margin-bottom: 0;
+}
+
 .hidden { display: none; }
 
 .explanation {
@@ -110,4 +120,5 @@ canvas {
 @media (max-width: 1100px) {
   .layout { grid-template-columns: 1fr; }
   .controls { max-height: none; }
+  .filter-grid { grid-template-columns: 1fr; }
 }

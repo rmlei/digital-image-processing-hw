@@ -29,13 +29,34 @@
 
     <section class="panel plots">
       <h2>图形显示区</h2>
-      <div class="canvas-wrap">
-        <h3>时域波形</h3>
-        <canvas id="timeCanvas" width="860" height="280"></canvas>
+      <div id="standard-plots">
+        <div class="canvas-wrap">
+          <h3>时域波形</h3>
+          <canvas id="timeCanvas" width="860" height="280"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>频域幅度谱</h3>
+          <canvas id="freqCanvas" width="860" height="280"></canvas>
+        </div>
       </div>
-      <div class="canvas-wrap">
-        <h3>频域幅度谱</h3>
-        <canvas id="freqCanvas" width="860" height="280"></canvas>
+
+      <div id="filter-plots" class="filter-grid hidden">
+        <div class="canvas-wrap">
+          <h3>滤波前时域波形</h3>
+          <canvas id="filterTimeBeforeCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波后时域波形</h3>
+          <canvas id="filterTimeAfterCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波前频域幅度谱</h3>
+          <canvas id="filterFreqBeforeCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波后频域幅度谱</h3>
+          <canvas id="filterFreqAfterCanvas" width="420" height="230"></canvas>
+        </div>
       </div>
     </section>
   </main>

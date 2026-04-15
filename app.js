@@ -24,6 +24,16 @@ const timeCanvas = document.getElementById('timeCanvas');
 const freqCanvas = document.getElementById('freqCanvas');
 const timeCtx = timeCanvas.getContext('2d');
 const freqCtx = freqCanvas.getContext('2d');
+const filterTimeBeforeCanvas = document.getElementById('filterTimeBeforeCanvas');
+const filterTimeAfterCanvas = document.getElementById('filterTimeAfterCanvas');
+const filterFreqBeforeCanvas = document.getElementById('filterFreqBeforeCanvas');
+const filterFreqAfterCanvas = document.getElementById('filterFreqAfterCanvas');
+const filterTimeBeforeCtx = filterTimeBeforeCanvas.getContext('2d');
+const filterTimeAfterCtx = filterTimeAfterCanvas.getContext('2d');
+const filterFreqBeforeCtx = filterFreqBeforeCanvas.getContext('2d');
+const filterFreqAfterCtx = filterFreqAfterCanvas.getContext('2d');
+const standardPlots = document.getElementById('standard-plots');
+const filterPlots = document.getElementById('filter-plots');
 const explanationText = document.getElementById('explanationText');
 
 init();
@@ -31,6 +41,7 @@ init();
 function init() {
   buildControlPanels();
   bindModuleSwitch();
+  togglePlotLayout();
   updateAll();
 }
 
@@ -85,9 +96,16 @@ function bindModuleSwitch() {
       state.module = e.target.value;
       document.querySelectorAll('.module-controls').forEach(box => box.classList.add('hidden'));
       document.getElementById(`controls-${state.module}`).classList.remove('hidden');
+      togglePlotLayout();
       updateAll();
     });
   });
+}
+
+function togglePlotLayout() {
+  const isFilter = state.module === 'filter';
+  standardPlots.classList.toggle('hidden', isFilter);
+  filterPlots.classList.toggle('hidden', !isFilter);
 }
 
 function bindControlEvents() {
@@ -106,23 +124,27 @@ function updateAll() {
   if (state.module === 'single') {
     const x = synthSingle(state.single);
     const spec = dftMagnitude(x);
-    drawTimePlot([x], ['#2358d8'], { yMin: -2.5, yMax: 2.5 });
+    drawTimePlot(timeCtx, timeCanvas, [x], ['#2358d8'], { yMin: -2.5, yMax: 2.5 });
     // 单正弦模块固定频谱纵轴，便于观察 A 改变时谱峰高度的真实变化
-    drawFreqPlot([spec], ['#18a27a'], { yMin: 0, yMax: 1.2 });
+    drawFreqPlot(freqCtx, freqCanvas, [spec], ['#18a27a'], { yMin: 0, yMax: 1.2 });
     setExplanation(singleExplanation());
   } else if (state.module === 'multi') {
     const x = synthMulti(state.multi);
     const spec = dftMagnitude(x);
     const maxAbs = state.multi.s1.amp + state.multi.s2.amp + state.multi.s3.amp;
-    drawTimePlot([x], ['#2358d8'], { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 });
-    drawFreqPlot([spec], ['#18a27a']);
+    drawTimePlot(timeCtx, timeCanvas, [x], ['#2358d8'], { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 });
+    drawFreqPlot(freqCtx, freqCanvas, [spec], ['#18a27a']);
     setExplanation(multiExplanation());
   } else {
     const { origin, filtered, originSpec, filteredSpec } = runFilterDemo(state.filter);
     const maxAbs = state.filter.lowAmp + state.filter.highAmp;
-    drawTimePlot([origin, filtered], ['#7d3cff', '#d83c3c'], { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 });
-    drawFreqPlot([originSpec, filteredSpec], ['#9d83ff', '#ff7a7a']);
-    setExplanation(filterExplanation());
+    const timeRange = { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 };
+    const freqRange = { yMin: 0, yMax: Math.max(1.2, maxAbs * 0.8) };
+    drawTimePlot(filterTimeBeforeCtx, filterTimeBeforeCanvas, [origin], ['#7d3cff'], timeRange);
+    drawTimePlot(filterTimeAfterCtx, filterTimeAfterCanvas, [filtered], ['#d83c3c'], timeRange);
+    drawFreqPlot(filterFreqBeforeCtx, filterFreqBeforeCanvas, [originSpec], ['#9d83ff'], freqRange);
+    drawFreqPlot(filterFreqAfterCtx, filterFreqAfterCanvas, [filteredSpec], ['#ff7a7a'], freqRange);
+    setExplanation(filterExplanation(state.filter));
   }
 }
 
@@ -213,9 +235,9 @@ function complexToMagnitude(cpx) {
   return mag;
 }
 
-function drawTimePlot(seriesList, colors, options = {}) {
-  clearCanvas(timeCtx, timeCanvas);
-  drawAxes(timeCtx, timeCanvas, 't (s)', 'x(t)');
+function drawTimePlot(ctx, canvas, seriesList, colors, options = {}) {
+  clearCanvas(ctx, canvas);
+  drawAxes(ctx, canvas, 't (s)', 'x(t)');
 
   const all = seriesList.flat();
   const autoY = Math.max(1e-6, ...all.map(v => Math.abs(v))) * 1.2;
@@ -223,22 +245,22 @@ function drawTimePlot(seriesList, colors, options = {}) {
   const yMax = Number.isFinite(options.yMax) ? options.yMax : autoY;
 
   seriesList.forEach((series, i) => {
-    timeCtx.beginPath();
-    timeCtx.strokeStyle = colors[i];
-    timeCtx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
     for (let n = 0; n < N; n++) {
-      const x = mapX(n / (N - 1), timeCanvas.width);
-      const y = mapY(series[n], yMin, yMax, timeCanvas.height);
-      if (n === 0) timeCtx.moveTo(x, y);
-      else timeCtx.lineTo(x, y);
+      const x = mapX(n / (N - 1), canvas.width);
+      const y = mapY(series[n], yMin, yMax, canvas.height);
+      if (n === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
-    timeCtx.stroke();
+    ctx.stroke();
   });
 }
 
-function drawFreqPlot(specList, colors, options = {}) {
-  clearCanvas(freqCtx, freqCanvas);
-  drawAxes(freqCtx, freqCanvas, 'f (Hz)', '|X(f)|');
+function drawFreqPlot(ctx, canvas, specList, colors, options = {}) {
+  clearCanvas(ctx, canvas);
+  drawAxes(ctx, canvas, 'f (Hz)', '|X(f)|');
 
   const bins = specList[0].length;
   const fMax = SAMPLE_RATE / 2;
@@ -247,23 +269,23 @@ function drawFreqPlot(specList, colors, options = {}) {
   const yMax = Number.isFinite(options.yMax) ? options.yMax : autoY;
 
   specList.forEach((spec, i) => {
-    freqCtx.beginPath();
-    freqCtx.strokeStyle = colors[i];
-    freqCtx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 2;
     for (let k = 0; k < bins; k++) {
-      const x = mapX(k / (bins - 1), freqCanvas.width);
-      const y = mapY(spec[k], yMin, yMax, freqCanvas.height);
-      if (k === 0) freqCtx.moveTo(x, y);
-      else freqCtx.lineTo(x, y);
+      const x = mapX(k / (bins - 1), canvas.width);
+      const y = mapY(spec[k], yMin, yMax, canvas.height);
+      if (k === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
-    freqCtx.stroke();
+    ctx.stroke();
   });
 
-  freqCtx.fillStyle = '#4b5d7a';
-  freqCtx.font = '12px sans-serif';
+  ctx.fillStyle = '#4b5d7a';
+  ctx.font = '12px sans-serif';
   for (let f = 0; f <= fMax; f += 8) {
-    const x = mapX(f / fMax, freqCanvas.width);
-    freqCtx.fillText(String(f), x - 6, freqCanvas.height - 18);
+    const x = mapX(f / fMax, canvas.width);
+    ctx.fillText(String(f), x - 6, canvas.height - 18);
   }
 }
 
@@ -356,14 +378,12 @@ function multiExplanation() {
   `;
 }
 
-function filterExplanation() {
-  const typeText = state.filter.type === 'lowpass' ? '低通' : '高通';
+function filterExplanation(filterState) {
+  const typeText = filterState.type === 'lowpass' ? '低通' : '高通';
+  const suppressText = filterState.type === 'lowpass' ? '高频分量被抑制' : '低频分量被抑制';
+  const remainText = filterState.type === 'lowpass' ? '低频成分' : '高频成分';
   return `
-    <div class="legend">
-      <span><i class="swatch" style="background:#7d3cff"></i> 原始时域</span>
-      <span><i class="swatch" style="background:#d83c3c"></i> 滤波后时域</span>
-    </div>
-    <p class="note"><strong>${typeText}滤波演示：</strong>通过截止频率 fc 决定保留哪些频率成分。低通保留低频、抑制高频；高通反之。</p>
-    <p class="note">请观察右侧频谱图：被抑制的频率峰会显著降低。再回到时域图，你会看到波形由“高低频混合”变为“更平滑”或“更快速振荡”，这体现了频域处理对时域形状的决定作用。</p>
+    <p class="note"><strong>${typeText}滤波教学解读：</strong>当前输入信号包含 ${filterState.lowFreq} Hz 和 ${filterState.highFreq} Hz 两个主要频率分量。截止频率为 ${filterState.cutoff} Hz，采用${typeText}滤波后，${suppressText}，因此输出信号主要保留${remainText}。</p>
+    <p class="note">建议按“左上→右上→左下→右下”顺序观察四图：先比较时域前后差异，再在频域中验证对应频率峰值是否被保留或削弱。</p>
   `;
 }
