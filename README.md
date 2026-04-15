@@ -1,74 +1,51 @@
-# digital-image-processing-hw
-Homeworks(codes &amp; reports) from 2016 SYSU's Digital Image Processing course taught by Professor Hongyang Chao.
-## Welcome
-Welcome to my DIP homeworks! They are basic exercises for understanding DIP fundamental knowledge. Our text book is Digital Image Processing by Gonzalez and Woods.
+# 傅里叶变换教学交互网页（纯 HTML/CSS/JavaScript）
 
-Warning: homework solutions for reference but not Plagiarism.
+这是一个面向大二《信号与系统》课程的离线教学小项目，用于直观理解“时域—频域”的对应关系与滤波思想。
 
-If you find bugs, false logic, just anything that could be better, please do me a favor by creating issues. I would love to see constructively negative feedbacks.
+## 运行方式（无需后端）
+1. 直接双击 `index.html`
+2. 在浏览器中打开后即可交互使用
 
-And sorry that the implementation of Fast Fourier Transform in hw3 maybe wrong.
+> 不使用 Python、不使用后端、不依赖本地服务器。
 
-## Structure
-There are four homeworks and a final project in total.
-Each homework is composed of several questions and certain programming works.
-And the final project is about haze removal.
+## 功能模块（第一版）
 
+### 1）单正弦信号
+- 可调参数：幅值 A、频率 f、相位 φ
+- 右侧同步显示：
+  - 时域波形
+  - 频域幅度谱
 
-### hw1-Scaling and Quantization
-1. Exercises
-  * Storage
-  * Adjacency
-  * Logical Operations
-2. Programming Tasks
-  * Scaling
-  * Quantization
+### 2）多个正弦叠加
+- 提供 3 个正弦分量，每个分量可独立调节：幅值、频率、相位
+- 帮助理解：复杂波形在频域中可分解为多个谱峰
 
-### hw2-Histogram and Spatial Filtering
-1. Exercises
-  * Linearity
-  * Spatial Filtering
-  * Logical Operations
-2. Programming Tasks
-  * Histogram Equalization
-  * Spatial Filtering
+### 3）低通 / 高通滤波演示
+- 输入信号由低频 + 高频两部分组成
+- 可调参数：两分量幅值/频率、截止频率 fc、滤波器类型（低通/高通）
+- 显示原始与滤波后在时域和频域的变化
 
-### hw3-Filtering in the Frequency Domain
-1. Exercises
-  * Rotation
-  * Fourier Spectrum
-  * Lowpass and Highpass
-2. Programming Tasks
-  * Fourier Transform
-  * Bonus: Fast Fourier Transform
-  * Filtering in the Frequency Domain
+## 界面布局
+- 左侧：参数控制区（滑块 + 下拉框）
+- 右侧：图形显示区（时域图 + 频域图）
+- 下方：教学解释文字（随模块切换）
 
-### hw4-Image Restoration and Color Image Processing
-1. Exercises
-  * Color Spaces
-  * Fourier Spectrum
-  * Lowpass and Highpass
-2. Programming Tasks
-  * Image Filtering
-  * Image Denoising
-  * Histogram Equalization on Color Images
+## 技术说明
+- 采用原生 Canvas 绘图（无第三方依赖）
+- 使用 JavaScript 进行离散傅里叶变换（DFT）与逆变换（IDFT）演示
+- 所有参数变化都会触发时域与频谱联动更新
 
-### Final Project: Haze Removal
-1. Description & Background
-  
-   In ECCV 2010 (one of the top conferences in Computer Vision), 
-   Kaiming He (currently a researcher in Facebook) designed a simple 
-   but powerful approach to perform as an edge-preserving smoothing operator, 
-   called Guided Image Filer. This operator is proposed as a smoothing operator,
-   but moreover, it is effective and efficient in a great variety of computer vision
-   and graphics applications, including details enhancement, HDR compression, 
-   image matting/feathering, etc. This approach has been included in Matlab 2014
-   and OpenCV 3.0 as a basic function. Considering its easy implementation, 
-   we can reproduce it in the final project.
-2. Tasks
-  * Implement the approach described in "guided_image_filtering_eccv2010.pdf"(2013 version is better) paper.
-  * Evaluate the implementation by conducting experiments.
-  * Explore the disadvantages of the paper by experiments, and try to handle those issues.
+## 项目结构
 
-3. Reference
-  [Guided Image Filtering](http://kaiminghe.com/eccv10/index.html)
+```text
+.
+├── index.html   # 页面结构
+├── style.css    # 样式布局
+├── app.js       # 交互逻辑、信号生成、DFT/IDFT、绘图
+└── README.md    # 项目说明
+```
+
+## 课堂建议用法
+- 先用“单正弦”建立谱峰与频率的对应直觉
+- 再用“多正弦叠加”说明傅里叶分解思想
+- 最后用“滤波演示”连接频域处理与时域波形变化
