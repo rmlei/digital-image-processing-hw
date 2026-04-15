@@ -107,7 +107,8 @@ function updateAll() {
     const x = synthSingle(state.single);
     const spec = dftMagnitude(x);
     drawTimePlot([x], ['#2358d8'], { yMin: -2.5, yMax: 2.5 });
-    drawFreqPlot([spec], ['#18a27a']);
+    // 单正弦模块固定频谱纵轴，便于观察 A 改变时谱峰高度的真实变化
+    drawFreqPlot([spec], ['#18a27a'], { yMin: 0, yMax: 1.2 });
     setExplanation(singleExplanation());
   } else if (state.module === 'multi') {
     const x = synthMulti(state.multi);
@@ -235,13 +236,15 @@ function drawTimePlot(seriesList, colors, options = {}) {
   });
 }
 
-function drawFreqPlot(specList, colors) {
+function drawFreqPlot(specList, colors, options = {}) {
   clearCanvas(freqCtx, freqCanvas);
   drawAxes(freqCtx, freqCanvas, 'f (Hz)', '|X(f)|');
 
   const bins = specList[0].length;
   const fMax = SAMPLE_RATE / 2;
-  const ymax = Math.max(1e-6, ...specList.flat()) * 1.2;
+  const autoY = Math.max(1e-6, ...specList.flat()) * 1.2;
+  const yMin = Number.isFinite(options.yMin) ? options.yMin : 0;
+  const yMax = Number.isFinite(options.yMax) ? options.yMax : autoY;
 
   specList.forEach((spec, i) => {
     freqCtx.beginPath();
@@ -249,7 +252,7 @@ function drawFreqPlot(specList, colors) {
     freqCtx.lineWidth = 2;
     for (let k = 0; k < bins; k++) {
       const x = mapX(k / (bins - 1), freqCanvas.width);
-      const y = mapY(spec[k], 0, ymax, freqCanvas.height);
+      const y = mapY(spec[k], yMin, yMax, freqCanvas.height);
       if (k === 0) freqCtx.moveTo(x, y);
       else freqCtx.lineTo(x, y);
     }
