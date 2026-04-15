@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>信号与系统：傅里叶变换教学交互页</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>《信号与系统》傅里叶变换频域分析教学演示</h1>
+    <p>纯前端离线版（双击 <code>index.html</code> 即可运行）</p>
+  </header>
+
+  <main class="layout">
+    <aside class="panel controls">
+      <h2>参数控制区</h2>
+
+      <div class="module-switch">
+        <label><input type="radio" name="module" value="single" checked> 1) 单正弦信号</label>
+        <label><input type="radio" name="module" value="multi"> 2) 多正弦叠加</label>
+        <label><input type="radio" name="module" value="filter"> 3) 低通/高通滤波</label>
+      </div>
+
+      <section id="controls-single" class="module-controls"></section>
+      <section id="controls-multi" class="module-controls hidden"></section>
+      <section id="controls-filter" class="module-controls hidden"></section>
+    </aside>
+
+    <section class="panel plots">
+      <h2>图形显示区</h2>
+      <div id="standard-plots">
+        <div class="canvas-wrap">
+          <h3>时域波形</h3>
+          <canvas id="timeCanvas" width="860" height="280"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>频域幅度谱</h3>
+          <canvas id="freqCanvas" width="860" height="280"></canvas>
+        </div>
+      </div>
+
+      <div id="filter-plots" class="filter-grid hidden">
+        <div class="canvas-wrap">
+          <h3>滤波前时域波形</h3>
+          <canvas id="filterTimeBeforeCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波后时域波形</h3>
+          <canvas id="filterTimeAfterCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波前频域幅度谱</h3>
+          <canvas id="filterFreqBeforeCanvas" width="420" height="230"></canvas>
+        </div>
+        <div class="canvas-wrap">
+          <h3>滤波后频域幅度谱</h3>
+          <canvas id="filterFreqAfterCanvas" width="420" height="230"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="panel explanation">
+    <h2>教学解释</h2>
+    <div id="explanationText"></div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
