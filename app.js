@@ -106,18 +106,20 @@ function updateAll() {
   if (state.module === 'single') {
     const x = synthSingle(state.single);
     const spec = dftMagnitude(x);
-    drawTimePlot([x], ['#2358d8']);
+    drawTimePlot([x], ['#2358d8'], { yMin: -2.5, yMax: 2.5 });
     drawFreqPlot([spec], ['#18a27a']);
     setExplanation(singleExplanation());
   } else if (state.module === 'multi') {
     const x = synthMulti(state.multi);
     const spec = dftMagnitude(x);
-    drawTimePlot([x], ['#2358d8']);
+    const maxAbs = state.multi.s1.amp + state.multi.s2.amp + state.multi.s3.amp;
+    drawTimePlot([x], ['#2358d8'], { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 });
     drawFreqPlot([spec], ['#18a27a']);
     setExplanation(multiExplanation());
   } else {
     const { origin, filtered, originSpec, filteredSpec } = runFilterDemo(state.filter);
-    drawTimePlot([origin, filtered], ['#7d3cff', '#d83c3c']);
+    const maxAbs = state.filter.lowAmp + state.filter.highAmp;
+    drawTimePlot([origin, filtered], ['#7d3cff', '#d83c3c'], { yMin: -Math.max(1, maxAbs) * 1.2, yMax: Math.max(1, maxAbs) * 1.2 });
     drawFreqPlot([originSpec, filteredSpec], ['#9d83ff', '#ff7a7a']);
     setExplanation(filterExplanation());
   }
@@ -210,12 +212,14 @@ function complexToMagnitude(cpx) {
   return mag;
 }
 
-function drawTimePlot(seriesList, colors) {
+function drawTimePlot(seriesList, colors, options = {}) {
   clearCanvas(timeCtx, timeCanvas);
   drawAxes(timeCtx, timeCanvas, 't (s)', 'x(t)');
 
   const all = seriesList.flat();
-  const ymax = Math.max(1e-6, ...all.map(v => Math.abs(v))) * 1.2;
+  const autoY = Math.max(1e-6, ...all.map(v => Math.abs(v))) * 1.2;
+  const yMin = Number.isFinite(options.yMin) ? options.yMin : -autoY;
+  const yMax = Number.isFinite(options.yMax) ? options.yMax : autoY;
 
   seriesList.forEach((series, i) => {
     timeCtx.beginPath();
@@ -223,7 +227,7 @@ function drawTimePlot(seriesList, colors) {
     timeCtx.lineWidth = 2;
     for (let n = 0; n < N; n++) {
       const x = mapX(n / (N - 1), timeCanvas.width);
-      const y = mapY(series[n], -ymax, ymax, timeCanvas.height);
+      const y = mapY(series[n], yMin, yMax, timeCanvas.height);
       if (n === 0) timeCtx.moveTo(x, y);
       else timeCtx.lineTo(x, y);
     }
